@@ -1,6 +1,9 @@
 ## Brendan Neal and Adam Lobo
 ## ENPM661 Project 3 A*
 
+#STILL NEED:
+#OBSTACLES, PLOTTING, VIDEO, CHECK IN WS AND OBSTACLES
+
 
 ##------------------------Importing Libraries-------------------------##
 import numpy as np
@@ -235,7 +238,7 @@ GoalReach = False #Initialze Goal Check Variable
 Closed_List= []#Initialize Closed List of nodes, size of workspace, and setting their cost to infinity to allow for Dijkstra searching.
 
 
-##---------------------------CONDUCT DIJKSTRA---------------------##
+##-----------------------CONDUCT A*---------------------##
 
 starttime = timeit.default_timer() #Start the Timer when serch starts
 print("A* Search Starting!!!!")
