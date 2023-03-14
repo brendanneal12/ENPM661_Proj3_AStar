@@ -154,6 +154,8 @@ def GeneratePossibleMoves(Current_Node, Step_Size, Theta):
 
     return PossibleMoves
 
+##------------------Defining my Cost to Go Calculation Function------------------------##
+
 def Calc_Cost2Go(Current_Node_Position, Goal_Node_Position):
     C2G = 0.0
 
@@ -161,6 +163,8 @@ def Calc_Cost2Go(Current_Node_Position, Goal_Node_Position):
         C2G = np.sqrt((Goal_Node_Position[0]-Current_Node_Position[0])**2 + (Goal_Node_Position[1]-Current_Node_Position[1])**2)
 
     return C2G
+
+##-----------------------Defining my Compare to Goal Function---------------------------##
 
 def CompareToGoal(Current_Node_Position, Goal_Node_Position, Threshold):
 
@@ -170,7 +174,46 @@ def CompareToGoal(Current_Node_Position, Goal_Node_Position, Threshold):
         return True
     else:
         return False
+
+##---------------------------Defining my Check Visited Function-----------------------##
+def CheckIfVisited(Current_Node, Node_Array, Goal_State, Threshold):
+    curr_node_state = Current_Node.ReturnState()
+    X = curr_node_state[0]
+    Y = curr_node_state[1]
+    Theta = curr_node_state[2]
+    X = int(np.round(X)/Threshold)
+    Y = int(np.round(Y)/Threshold)
+
+    if (Current_Node.ReturnCost() + Calc_Cost2Go(curr_node_state, Goal_State) < Node_Array[X,Y,Theta]):
+        result = True
+    else:
+        result = False
+
+    return result
+
+##------------------------Defining my GetInitialState Function-----------------------##
+def GetInitialState():
+    print("Enter Initial Node X,Y, and Theta separated by spaces: ")
+    Init_State=[int(x) for x in input().split()]
+    return Init_State
+
+
+##------------------------Defining my GetGoalState Function--------------------------##
+def GetGoalState():
+    print("Enter Goal Node X and Y, separated by spaces: ")
+    Goal_State=[int(x) for x in input().split()]
+    return  Goal_State
     
+##---------------------------------MAIN Function---------------------------------------##
+SizeAreaX = 600
+SizeAreaY = 250
+ThreshXY = 0.5
+ThreshTheta = 30
+Workspace = np.zeros((SizeAreaY, SizeAreaX,3), dtype = np.uint8) #Initialize the workspace as 0s at first. Integer data type to write to video.
+Workspace[:,:] = (0,0,0) #Set all colors to black.
+node_array = np.array([[[ math.inf for k in range(int(360/ThreshTheta))] for j in range(int(SizeAreaX/ThreshXY))] for i in range(int(SizeAreaY/ThreshXY))])
+print(node_array.shape)
     
+
 
 
