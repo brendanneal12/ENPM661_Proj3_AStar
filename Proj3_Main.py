@@ -154,4 +154,23 @@ def GeneratePossibleMoves(Current_Node, Step_Size, Theta):
 
     return PossibleMoves
 
+def Calc_Cost2Go(Current_Node_Position, Goal_Node_Position):
+    C2G = 0.0
+
+    if Current_Node_Position is not None:
+        C2G = np.sqrt((Goal_Node_Position[0]-Current_Node_Position[0])**2 + (Goal_Node_Position[1]-Current_Node_Position[1])**2)
+
+    return C2G
+
+def CompareToGoal(Current_Node_Position, Goal_Node_Position, Threshold):
+
+    Dist2Goal = (Goal_Node_Position[0] - Current_Node_Position[0])**2 + (Goal_Node_Position[1] - Current_Node_Position[1])**2
+
+    if Dist2Goal < Threshold**2:
+        return True
+    else:
+        return False
+    
+    
+
 
