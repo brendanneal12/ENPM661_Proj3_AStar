@@ -17,10 +17,11 @@ from queue import PriorityQueue
 ##------------Defining Node Class (From Previous Lab)-----------------##
 class Node():
     #Initializing Function
-    def __init__(self, state, parent, move, TotalCost):
+    def __init__(self, state, parent, move, C2C, TotalCost):
         self.state = state
         self.parent = parent
         self.move = move
+        self.C2C = C2C
         self.TotalCost = TotalCost
     #---Methods for this Class---#
     def ReturnState(self): #Returns Node State X and Y
@@ -40,11 +41,12 @@ class Node():
     def ReturnCost(self): #Returns the Cost Leading up to the Node
         return self.TotalCost
     
+    def ReturnC2C(self):
+        return self.C2C
+    
     def __lt__(self, other): #OOP Definition for Less than. Required for Priority Queue.
         return self.TotalCost < other.TotalCost
     
-    def __lte__(self, other):
-        return self.TotalCost < other.TotalCost
 
     
     ##--------------BACKTRACKING FUNCTION Integrated into Class--------##
@@ -62,19 +64,30 @@ class Node():
 
         return CompletedMoves, NodePath
     
+
+##------------------Defining my Check in Workspace? Function-------##   
+def CheckInWorkspace(CurrentX, CurrentY):
+    WsX_Extended = 600-1 #Index the workspace back 1 slot for indexing
+    WsY_Extended = 250-1 #Index the workspace back 1 slot for indexing
+    if (CurrentX > WsX_Extended or int(CurrentX)<1 or int(CurrentY)<1 or CurrentY>WsY_Extended): #If outside of workspace
+        return 1 # Logic will be used later!!!
+    return 0
 ##---------------------Mathematically Defining Action Set-------------------------##
 def MoveMaxTurnLeft(Current_State, Step_Size, AngleOffset):
     curr_theta = Current_State[2]
     adjusted_theta = curr_theta + 2*AngleOffset
     if adjusted_theta >= 360:
         adjusted_theta = adjusted_theta - 360
-    if adjusted_theta <= -360:
-        adjusted_theta = adjusted_theta +360
+    if adjusted_theta <= 0:
+        adjusted_theta = adjusted_theta + 180
 
     ChangeX = float(Step_Size)*np.cos(np.deg2rad(adjusted_theta))
     ChangeY = Step_Size*np.cos(np.deg2rad(adjusted_theta))
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
+
+    if CheckInWorkspace(NewNodeState[0], NewNodeState[1]):
+        return None
 
     # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
     #     return None
@@ -86,13 +99,16 @@ def MoveTurnLeft(Current_State, Step_Size, AngleOffset):
     adjusted_theta = curr_theta + AngleOffset
     if adjusted_theta >= 360:
         adjusted_theta = adjusted_theta - 360
-    if adjusted_theta <= -360:
-        adjusted_theta = adjusted_theta +360
+    if adjusted_theta <= 0:
+        adjusted_theta = adjusted_theta + 180
 
     ChangeX = Step_Size*np.cos(np.deg2rad(adjusted_theta))
     ChangeY = Step_Size*np.cos(np.deg2rad(adjusted_theta))
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
+
+    if CheckInWorkspace(NewNodeState[0], NewNodeState[1]):
+        return None
 
     # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
     #     return None
@@ -107,6 +123,8 @@ def MoveStraight(Current_State, Step_Size):
     ChangeY = Step_Size*np.cos(np.deg2rad(adjusted_theta))
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
+    if CheckInWorkspace(NewNodeState[0], NewNodeState[1]):
+        return None
 
     # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
     #     return None
@@ -118,13 +136,16 @@ def MoveMaxTurnRight(Current_State, Step_Size, AngleOffset):
     adjusted_theta = curr_theta - 2*AngleOffset
     if adjusted_theta >= 360:
         adjusted_theta = adjusted_theta - 360
-    if adjusted_theta <= -360:
-        adjusted_theta = adjusted_theta +360
+    if adjusted_theta <= 0:
+        adjusted_theta = adjusted_theta +180
 
     ChangeX = Step_Size*np.cos(np.deg2rad(adjusted_theta))
     ChangeY = Step_Size*np.cos(np.deg2rad(adjusted_theta))
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
+
+    if CheckInWorkspace(NewNodeState[0], NewNodeState[1]):
+        return None
 
     # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
     #     return None
@@ -136,13 +157,16 @@ def MoveTurnRight(Current_State, Step_Size, AngleOffset):
     adjusted_theta = curr_theta - AngleOffset
     if adjusted_theta >= 360:
         adjusted_theta = adjusted_theta - 360
-    if adjusted_theta <= -360:
-        adjusted_theta = adjusted_theta +360
+    if adjusted_theta <= 0:
+        adjusted_theta = adjusted_theta + 180
 
     ChangeX = Step_Size*np.cos(np.deg2rad(adjusted_theta))
     ChangeY = Step_Size*np.cos(np.deg2rad(adjusted_theta))
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
+
+    if CheckInWorkspace(NewNodeState[0], NewNodeState[1]):
+        return None
 
     # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
     #     return None
@@ -156,11 +180,11 @@ def GeneratePossibleMoves(Current_Node, Step_Size, Theta):
     Poss_Move_List = ["MaxTurnLeft", "LeftTurn", "Straight", "RightTurn", "MaxTurnRight"]
     CurrNodeState = Current_Node.ReturnState()
     actionmoves = []
-    actionmoves.append(Node(MoveMaxTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
-    actionmoves.append(Node(MoveTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
-    actionmoves.append(Node(MoveStraight(CurrNodeState, Step_Size), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
-    actionmoves.append(Node(MoveMaxTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
-    actionmoves.append(Node(MoveTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveMaxTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[1], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveStraight(CurrNodeState, Step_Size), Current_Node, Poss_Move_List[2], Current_Node.ReturnCost() + Step_Size,Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveMaxTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[3], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[4], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size))
 
 
     PossibleMoves = [NewNode for NewNode in actionmoves if NewNode.ReturnState() is not None]
@@ -197,7 +221,7 @@ def Round2Half(number):
     return testvalue
 
 ##---------------------------Defining my Check Visited Function-----------------------##
-def CheckIfVisited(Current_Node, Node_Array, Goal_State, XYThreshold, ThetaThreshold):
+def CheckIfVisited(Current_Node, Node_Array, XYThreshold, ThetaThreshold):
     curr_node_state = Current_Node.ReturnState()
     X = curr_node_state[0]
     Y = curr_node_state[1]
@@ -236,7 +260,18 @@ def GetStepSize():
     StepSize=int(input())
     return  StepSize
 
-    
+##------------------------Defining my Vector Plotter Function--------------------------##
+def VectorPlotter(CurrentNodeState, ParentNodeState, Color):
+    plt.quiver(ParentNodeState[0], ParentNodeState[1], CurrentNodeState[0], CurrentNodeState[1] ,units='xy' ,scale=1 ,color= Color ,headwidth =2,headlength=2)
+    return plt
+
+#----------------Defining my Map Coloring Function---------------##
+def WSColoring(Workspace, Location, Color):
+    x,_,_ = Workspace.shape #Get Shape of Workspace
+    translation_y = Location[0] #Where in Y
+    translation_x = x - Location[1] - 1 #Where in X - (Shifts origin from top left to bottom right when plotting!)
+    Workspace[translation_x,translation_y,:] = Color #Change the Color to a set Color
+    return Workspace  
 ##---------------------------------MAIN Function---------------------------------------##
 SizeAreaX = 600
 SizeAreaY = 250
@@ -254,10 +289,15 @@ GoalState = GetGoalState() #Grab Goal State
 #Clearance = GetClearance()
 StepSize = GetStepSize()
 
+Workspace= WSColoring(Workspace, InitState[0:2], [0,255,0]) #Plot initial state in GREEN on Workspace.
+Workspace = WSColoring(Workspace, GoalState[0:2], [0,255,0]) #Plot goal state in GREEN on Workspace.
+plt.imshow(Workspace)
+plt.show()
+
 Open_List = PriorityQueue() #Initialize list using priority queue.
 
-starting_node = Node(InitState, None, None, Calc_Cost2Go(InitState, GoalState)) #Generate starting node based on the initial state given above.
-
+starting_node_Temp = Node(InitState, None, None, 0, Calc_Cost2Go(InitState, GoalState)) #Generate starting node based on the initial state given above.
+starting_node = Node(InitState, starting_node_Temp, None, 0, Calc_Cost2Go(InitState, GoalState)) #Generate starting node based on the initial state given above.
 Open_List.put((starting_node.ReturnCost(), starting_node)) #Add to Open List
 
 GoalReach = False #Initialze Goal Check Variable
@@ -275,28 +315,40 @@ print("A* Search Starting!!!!")
 while not (Open_List.empty()):
     current_node = Open_List.get()[1] #Grab first (lowest cost) item from Priority Queue.
     Closed_List.append(current_node) #Add popped node location to Closed List
-
+    VectorPlotter(current_node.ReturnState(), current_node.ReturnParentState(), 'g')
     goalreachcheck = CompareToGoal(current_node.ReturnState(), GoalState, ThreshGoalState) #Check if we have reached goal.
 
     if goalreachcheck: #If we have reached goal node.
         print("Goal Reached!")
         print("Total Cost:", current_node.ReturnCost()) #Print Total Cost
         MovesPath, Path = current_node.ReturnPath() #BackTrack to find path.
+        for nodes in Path:
+            VectorPlotter(nodes.ReturnState(), nodes.ReturnParentState(), 'm')
+
 
     else: #If you have NOT reached the goal node
         NewNodes = GeneratePossibleMoves(current_node, StepSize, 30)#Generate New Nodes from the possible moves current node can take.
         if NewNodes not in Closed_List: #Check to see if the new node position is currently in the closed list
             for TestNode in NewNodes: #For each new node generated by the possible moves.
-                if not CheckIfVisited(TestNode, node_array, GoalState, ThreshXY, ThreshTheta):
-                    print(TestNode.ReturnState())
+
+                if not CheckIfVisited(TestNode, node_array, ThreshXY, ThreshTheta):
+                    #print(TestNode.ReturnState())
                     node_array[int(Round2Half(TestNode.ReturnState()[0]/ThreshXY)), int(Round2Half(TestNode.ReturnState()[1]/ThreshXY)), int(Round2Half(TestNode.ReturnState()[2]/ThreshTheta))] = 1
                     TestNode.TotalCost += Calc_Cost2Go(TestNode.ReturnState(), GoalState)
                     Open_List.put((TestNode.ReturnCost() , TestNode))
+                    
+                if CheckIfVisited(TestNode, node_array, ThreshXY, ThreshTheta): #If Visited, Update
+                    if TestNode.ReturnCost() > current_node.ReturnCost():
+                        TestNode.parent = current_node
+                        TestNode.C2C = current_node.ReturnCost()
+                        TestNode.TotalCost = TestNode.C2C + Calc_Cost2Go(TestNode.ReturnState(), GoalState)
 
-        if goalreachcheck: #If you reach goal
-            break #Break the Loop
+    if goalreachcheck: #If you reach goal
+        break #Break the Loop
 
 stoptime = timeit.default_timer() #Stop the Timer, as Searching is complete.
+plt.imshow(Workspace, origin = 'lower')
+plt.show()
     
 
 
