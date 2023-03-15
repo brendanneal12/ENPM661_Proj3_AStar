@@ -180,11 +180,11 @@ def GeneratePossibleMoves(Current_Node, Step_Size, Theta):
     Poss_Move_List = ["MaxTurnLeft", "LeftTurn", "Straight", "RightTurn", "MaxTurnRight"]
     CurrNodeState = Current_Node.ReturnState()
     actionmoves = []
-    actionmoves.append(Node(MoveMaxTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size))
-    actionmoves.append(Node(MoveTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[1], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size))
-    actionmoves.append(Node(MoveStraight(CurrNodeState, Step_Size), Current_Node, Poss_Move_List[2], Current_Node.ReturnCost() + Step_Size,Current_Node.ReturnCost() + Step_Size))
-    actionmoves.append(Node(MoveMaxTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[3], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size))
-    actionmoves.append(Node(MoveTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[4], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveMaxTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size + Calc_Cost2Go(MoveMaxTurnLeft(CurrNodeState, Step_Size, Theta), GoalState)))
+    actionmoves.append(Node(MoveTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[1], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size + Calc_Cost2Go(MoveTurnLeft(CurrNodeState, Step_Size, Theta), GoalState)))
+    actionmoves.append(Node(MoveStraight(CurrNodeState, Step_Size), Current_Node, Poss_Move_List[2], Current_Node.ReturnCost() + Step_Size,Current_Node.ReturnCost() + Step_Size+ Calc_Cost2Go(MoveStraight(CurrNodeState, Step_Size), GoalState)))
+    actionmoves.append(Node(MoveMaxTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[3], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size + Calc_Cost2Go(MoveMaxTurnRight(CurrNodeState, Step_Size, Theta), GoalState)))
+    actionmoves.append(Node(MoveTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[4], Current_Node.ReturnCost() + Step_Size, Current_Node.ReturnCost() + Step_Size + Calc_Cost2Go(MoveTurnRight(CurrNodeState, Step_Size, Theta), GoalState)))
 
 
     PossibleMoves = [NewNode for NewNode in actionmoves if NewNode.ReturnState() is not None]
@@ -230,7 +230,7 @@ def CheckIfVisited(Current_Node, Node_Array, XYThreshold, ThetaThreshold):
     Y = int(Round2Half(Y)/XYThreshold)
     Theta = int(Round2Half(Theta)/ThetaThreshold)
 
-    if Node_Array[X,Y,Theta] == 1:
+    if Node_Array[Y,X,Theta] == 1:
         result = True
     else:
         result = False
@@ -262,7 +262,8 @@ def GetStepSize():
 
 ##------------------------Defining my Vector Plotter Function--------------------------##
 def VectorPlotter(CurrentNodeState, ParentNodeState, Color):
-    plt.quiver(ParentNodeState[0], ParentNodeState[1], CurrentNodeState[0], CurrentNodeState[1] ,units='xy' ,scale=1 ,color= Color ,headwidth =2,headlength=2)
+    #plt.quiver(ParentNodeState[0], ParentNodeState[1], CurrentNodeState[0], CurrentNodeState[1] ,units='xy' ,scale=100 ,color= Color)
+    plt.plot([ParentNodeState[0], CurrentNodeState[0]],[ParentNodeState[1], CurrentNodeState[1]], 'm')
     return plt
 
 #----------------Defining my Map Coloring Function---------------##
@@ -272,6 +273,7 @@ def WSColoring(Workspace, Location, Color):
     translation_x = x - Location[1] - 1 #Where in X - (Shifts origin from top left to bottom right when plotting!)
     Workspace[translation_x,translation_y,:] = Color #Change the Color to a set Color
     return Workspace  
+
 ##---------------------------------MAIN Function---------------------------------------##
 SizeAreaX = 600
 SizeAreaY = 250
@@ -296,7 +298,7 @@ plt.show()
 
 Open_List = PriorityQueue() #Initialize list using priority queue.
 
-starting_node_Temp = Node(InitState, None, None, 0, Calc_Cost2Go(InitState, GoalState)) #Generate starting node based on the initial state given above.
+starting_node_Temp = Node(InitState, None, None, 0, 0) #Generate starting node based on the initial state given above.
 starting_node = Node(InitState, starting_node_Temp, None, 0, Calc_Cost2Go(InitState, GoalState)) #Generate starting node based on the initial state given above.
 Open_List.put((starting_node.ReturnCost(), starting_node)) #Add to Open List
 
@@ -314,7 +316,10 @@ print("A* Search Starting!!!!")
 
 while not (Open_List.empty()):
     current_node = Open_List.get()[1] #Grab first (lowest cost) item from Priority Queue.
+    print(current_node.ReturnState())
     Closed_List.append(current_node) #Add popped node location to Closed List
+
+
     VectorPlotter(current_node.ReturnState(), current_node.ReturnParentState(), 'g')
     goalreachcheck = CompareToGoal(current_node.ReturnState(), GoalState, ThreshGoalState) #Check if we have reached goal.
 
@@ -330,18 +335,14 @@ while not (Open_List.empty()):
         NewNodes = GeneratePossibleMoves(current_node, StepSize, 30)#Generate New Nodes from the possible moves current node can take.
         if NewNodes not in Closed_List: #Check to see if the new node position is currently in the closed list
             for TestNode in NewNodes: #For each new node generated by the possible moves.
-
-                if not CheckIfVisited(TestNode, node_array, ThreshXY, ThreshTheta):
-                    #print(TestNode.ReturnState())
-                    node_array[int(Round2Half(TestNode.ReturnState()[0]/ThreshXY)), int(Round2Half(TestNode.ReturnState()[1]/ThreshXY)), int(Round2Half(TestNode.ReturnState()[2]/ThreshTheta))] = 1
-                    TestNode.TotalCost += Calc_Cost2Go(TestNode.ReturnState(), GoalState)
+                if CheckIfVisited(TestNode, node_array, ThreshXY, ThreshTheta) == False:
+                    node_array[int(Round2Half(TestNode.ReturnState()[1]/ThreshXY)), int(Round2Half(TestNode.ReturnState()[0]/ThreshXY)), int(Round2Half(TestNode.ReturnState()[2]/ThreshTheta))] = 1
                     Open_List.put((TestNode.ReturnCost() , TestNode))
-                    
-                if CheckIfVisited(TestNode, node_array, ThreshXY, ThreshTheta): #If Visited, Update
+
+                if CheckIfVisited(TestNode, node_array, ThreshXY, ThreshTheta) == True: #If Visited, Update
                     if TestNode.ReturnCost() > current_node.ReturnCost():
                         TestNode.parent = current_node
-                        TestNode.C2C = current_node.ReturnCost()
-                        TestNode.TotalCost = TestNode.C2C + Calc_Cost2Go(TestNode.ReturnState(), GoalState)
+                        TestNode.TotalCost = current_node.ReturnCost()
 
     if goalreachcheck: #If you reach goal
         break #Break the Loop
