@@ -43,8 +43,9 @@ class Node():
     def __lt__(self, other): #OOP Definition for Less than. Required for Priority Queue.
         return self.TotalCost < other.TotalCost
     
-    def __gt__(self, other): #OOP Definition for Greater than.
+    def __lte__(self, other):
         return self.TotalCost < other.TotalCost
+
     
     ##--------------BACKTRACKING FUNCTION Integrated into Class--------##
     def ReturnPath(self):
@@ -62,25 +63,25 @@ class Node():
         return CompletedMoves, NodePath
     
 ##---------------------Mathematically Defining Action Set-------------------------##
-def MoveMaxTurnLeft(Current_State, Step_Size, robot_angle):
+def MoveMaxTurnLeft(Current_State, Step_Size, AngleOffset):
     curr_theta = Current_State[2]
-    adjusted_theta = curr_theta + 2*robot_angle
+    adjusted_theta = curr_theta + 2*AngleOffset
     if adjusted_theta >= 360:
         adjusted_theta = adjusted_theta - 360
 
-    ChangeX = Step_Size*np.cos(np.deg2rad(adjusted_theta))
+    ChangeX = float(Step_Size)*np.cos(np.deg2rad(adjusted_theta))
     ChangeY = Step_Size*np.cos(np.deg2rad(adjusted_theta))
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
 
-    if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
-        return None
+    # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
+    #     return None
     
     return NewNodeState
 
-def MoveTurnLeft(Current_State, Step_Size, robot_angle):
+def MoveTurnLeft(Current_State, Step_Size, AngleOffset):
     curr_theta = Current_State[2]
-    adjusted_theta = curr_theta + robot_angle
+    adjusted_theta = curr_theta + AngleOffset
     if adjusted_theta >= 360:
         adjusted_theta = adjusted_theta - 360
 
@@ -89,8 +90,8 @@ def MoveTurnLeft(Current_State, Step_Size, robot_angle):
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
 
-    if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
-        return None
+    # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
+    #     return None
     
     return NewNodeState
 
@@ -103,14 +104,14 @@ def MoveStraight(Current_State, Step_Size):
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
 
-    if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
-        return None
+    # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
+    #     return None
     
     return NewNodeState
 
-def MoveMaxTurnRight(Current_State, Step_Size, robot_angle):
+def MoveMaxTurnRight(Current_State, Step_Size, AngleOffset):
     curr_theta = Current_State[2]
-    adjusted_theta = curr_theta - 2*robot_angle
+    adjusted_theta = curr_theta - 2*AngleOffset
     if adjusted_theta >= 360:
         adjusted_theta = adjusted_theta - 360
 
@@ -119,14 +120,14 @@ def MoveMaxTurnRight(Current_State, Step_Size, robot_angle):
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
 
-    if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
-        return None
+    # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
+    #     return None
     
     return NewNodeState
 
-def MoveTurnRight(Current_State, Step_Size, robot_angle):
+def MoveTurnRight(Current_State, Step_Size, AngleOffset):
     curr_theta = Current_State[2]
-    adjusted_theta = curr_theta - robot_angle
+    adjusted_theta = curr_theta - AngleOffset
     if adjusted_theta >= 360:
         adjusted_theta = adjusted_theta - 360
 
@@ -135,8 +136,8 @@ def MoveTurnRight(Current_State, Step_Size, robot_angle):
 
     NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, adjusted_theta]
 
-    if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
-        return None
+    # if CheckInObstacle(NewNodeState[0], NewNodeState[1]): ############################################AdjustObstacleCheck
+    #     return None
     
     return NewNodeState
 
@@ -147,11 +148,12 @@ def GeneratePossibleMoves(Current_Node, Step_Size, Theta):
     Poss_Move_List = ["MaxTurnLeft", "LeftTurn", "Straight", "RightTurn", "MaxTurnRight"]
     CurrNodeState = Current_Node.ReturnState()
     actionmoves = []
-    actionmoves.append(MoveMaxTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size)
-    actionmoves.append(MoveTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size)
-    actionmoves.append(MoveStraight(CurrNodeState, Step_Size), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size)
-    actionmoves.append(MoveMaxTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size)
-    actionmoves.append(MoveTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size)
+    actionmoves.append(Node(MoveMaxTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveTurnLeft(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveStraight(CurrNodeState, Step_Size), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveMaxTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
+    actionmoves.append(Node(MoveTurnRight(CurrNodeState, Step_Size, Theta), Current_Node, Poss_Move_List[0], Current_Node.ReturnCost() + Step_Size))
+
 
     PossibleMoves = [NewNode for NewNode in actionmoves if NewNode.ReturnState() is not None]
 
@@ -187,13 +189,14 @@ def Round2Half(number):
     return testvalue
 
 ##---------------------------Defining my Check Visited Function-----------------------##
-def CheckIfVisited(Current_Node, Node_Array, Goal_State, Threshold):
+def CheckIfVisited(Current_Node, Node_Array, Goal_State, XYThreshold, ThetaThreshold):
     curr_node_state = Current_Node.ReturnState()
     X = curr_node_state[0]
     Y = curr_node_state[1]
     Theta = curr_node_state[2]
-    X = int(Round2Half(X)/Threshold)
-    Y = int(Round2Half(Y)/Threshold)
+    X = int(Round2Half(X)/XYThreshold)
+    Y = int(Round2Half(Y)/XYThreshold)
+    Theta = int(Round2Half(Theta)/ThetaThreshold)
 
     if (Current_Node.ReturnCost() + Calc_Cost2Go(curr_node_state, Goal_State) < Node_Array[X,Y,Theta]):
         result = True
@@ -222,7 +225,7 @@ def GetClearance():
 
 def GetStepSize():
     print("Enter Robot Step Size (L = 1 to L = 10)")
-    StepSize=[int(x) for x in input().split()]
+    StepSize=int(input())
     return  StepSize
 
     
@@ -232,20 +235,25 @@ SizeAreaY = 250
 ThreshXY = 0.5
 ThreshTheta = 30
 ThreshGoalState = 1.5
+Angles_Offset = 30
 Workspace = np.zeros((SizeAreaY, SizeAreaX,3), dtype = np.uint8) #Initialize the workspace as 0s at first. Integer data type to write to video.
 Workspace[:,:] = (0,0,0) #Set all colors to black.
-node_array = np.array([[[ math.inf for k in range(int(360/ThreshTheta))] for j in range(int(SizeAreaX/ThreshXY))] for i in range(int(SizeAreaY/ThreshXY))])
+node_array = np.array([[[ 0 for k in range(int(360/ThreshTheta))] for j in range(int(SizeAreaX/ThreshXY))] for i in range(int(SizeAreaY/ThreshXY))])
 print(node_array.shape)
 
 InitState = GetInitialState() #Grab Initial State
 GoalState = GetGoalState() #Grab Goal State
-Clearance = GetClearance()
+#Clearance = GetClearance()
 StepSize = GetStepSize()
 
 Open_List = PriorityQueue() #Initialize list using priority queue.
-starting_node = Node(InitState, None, None, 0) #Generate starting node based on the initial state given above.
+
+starting_node = Node(InitState, None, None, Calc_Cost2Go(InitState, GoalState)) #Generate starting node based on the initial state given above.
+
 Open_List.put((starting_node.ReturnCost(), starting_node)) #Add to Open List
+
 GoalReach = False #Initialze Goal Check Variable
+
 
 
 Closed_List= []#Initialize Closed List of nodes, size of workspace, and setting their cost to infinity to allow for Dijkstra searching.
@@ -268,15 +276,13 @@ while not (Open_List.empty()):
         MovesPath, Path = current_node.ReturnPath() #BackTrack to find path.
 
     else: #If you have NOT reached the goal node
-
-
-        NewNodes = GeneratePossibleMoves(current_node, StepSize, current_node.ReturnState()[2]) #Generate New Nodes from the possible moves current node can take.
+        NewNodes = GeneratePossibleMoves(current_node, StepSize, 30)#Generate New Nodes from the possible moves current node can take.
         if NewNodes not in Closed_List: #Check to see if the new node position is currently in the closed list
-            for move in NewNodes: #For each new node generated by the possible moves.
-                TestNode = Node(move[0], move[1], move[2], move[3])
-                if CheckIfVisited(TestNode, node_array, GoalState, ThreshXY):
-                    node_array[int(Round2Half(TestNode.returnState()[0]/ThreshXY)), int(Round2Half(TestNode.returnState()[1]/ThreshXY)), TestNode.ReturnState()[2]] = TestNode.ReturnCost() + Calc_Cost2Go(TestNode.returnState(), GoalState)
-                    Open_List.put((TestNode.ReturnCost() + Calc_Cost2Go(TestNode.returnState(), GoalState)), TestNode)
+            for TestNode in NewNodes: #For each new node generated by the possible moves.
+                if not CheckIfVisited(TestNode, node_array, GoalState, ThreshXY, ThreshTheta):
+                    node_array[int(Round2Half(TestNode.ReturnState()[0]/ThreshXY)), int(Round2Half(TestNode.ReturnState()[1]/ThreshXY)), int(Round2Half(TestNode.ReturnState()[2]/ThreshTheta))] = TestNode.ReturnCost() + Calc_Cost2Go(TestNode.ReturnState(), GoalState) 
+                    TestNode.TotalCost += Calc_Cost2Go(TestNode.ReturnState(), GoalState)
+                    Open_List.put((TestNode.ReturnCost() , TestNode))
         if goalreachcheck: #If you reach goal
             break #Break the Loop
 
