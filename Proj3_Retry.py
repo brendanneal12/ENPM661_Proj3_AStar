@@ -211,3 +211,99 @@ def checkValid(x, y, r):
         return False
     
     return True
+
+##---------------------------------Defining my Action Set-------------------------------------##
+def MoveMaxTurnLeft(Current_State, Step_Size, RobotRadius):
+    RobotTheta = Current_State[2]
+    if RobotTheta >=360:
+        RobotTheta = RobotTheta -360
+
+    MoveTheta = RobotTheta + 60
+
+    ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
+    ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
+
+    NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, MoveTheta]
+    if checkValid(NewNodeState[0], NewNodeState[1], RobotRadius) == False:
+        return None
+
+    return NewNodeState
+
+def MoveTurnLeft(Current_State, Step_Size, RobotRadius):
+    RobotTheta = Current_State[2]
+    if RobotTheta >=360:
+        RobotTheta = RobotTheta -360
+
+    MoveTheta = RobotTheta + 30
+
+    ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
+    ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
+
+    NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, MoveTheta]
+    if checkValid(NewNodeState[0], NewNodeState[1], RobotRadius) == False:
+        return None
+
+    return NewNodeState
+
+def MoveStraight(Current_State, Step_Size, RobotRadius):
+    RobotTheta = Current_State[2]
+    if RobotTheta >=360:
+        RobotTheta = RobotTheta -360
+
+    MoveTheta = RobotTheta
+
+    ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
+    ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
+
+    NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, MoveTheta]
+    if checkValid(NewNodeState[0], NewNodeState[1], RobotRadius) == False:
+        return None
+
+    return NewNodeState
+
+def MoveMaxTurnRight(Current_State, Step_Size, RobotRadius):
+    RobotTheta = Current_State[2]
+    if RobotTheta >=360:
+        RobotTheta = RobotTheta -360
+
+    MoveTheta = RobotTheta - 60
+
+    ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
+    ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
+
+    NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, MoveTheta]
+    if checkValid(NewNodeState[0], NewNodeState[1], RobotRadius) == False:
+        return None
+
+    return NewNodeState
+
+def MoveTurnRight(Current_State, Step_Size, RobotRadius):
+    RobotTheta = Current_State[2]
+    if RobotTheta >=360:
+        RobotTheta = RobotTheta -360
+
+    MoveTheta = RobotTheta -30
+
+    ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
+    ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
+
+    NewNodeState = [Current_State[0] + ChangeX, Current_State[1] + ChangeY, MoveTheta]
+    if checkValid(NewNodeState[0], NewNodeState[1], RobotRadius) == False:
+        return None
+
+    return NewNodeState
+
+
+def GeneratePossibleMoves(Current_Node_State, StepSize, Robot_Radius):
+    New_Node_Locations = []
+    New_Node_Locations.append(MoveMaxTurnLeft(Current_Node_State, StepSize, Robot_Radius))
+    New_Node_Locations.append(MoveTurnLeft(Current_Node_State, StepSize, Robot_Radius))
+    New_Node_Locations.append(MoveStraight(Current_Node_State, StepSize, Robot_Radius))
+    New_Node_Locations.append(MoveMaxTurnRight(Current_Node_State, StepSize, Robot_Radius))
+    New_Node_Locations.append(MoveTurnLeft(Current_Node_State, StepSize, Robot_Radius))
+
+    Possible_New_States = [Location for Location in New_Node_Locations if Location is not None]
+
+    return Possible_New_States
+
+
