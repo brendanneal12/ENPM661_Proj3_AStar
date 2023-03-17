@@ -63,7 +63,7 @@ class Node():
         return CompletedMoves, NodePath
     
 ##----------------------Defining Obstacle Space Setup Functions--------------------##
-def setup():
+def setup(robotradius):
 
     global arena
     
@@ -77,7 +77,7 @@ def setup():
 
         for y in range(0, 250):
         
-            if checkClearance(x, y, 2):
+            if checkClearance(x, y, robotradius):
                 arena[y, x] = darkGray
     
     #Draw Obstacle Borders
@@ -368,7 +368,7 @@ def GetGoalState():
     Goal_State=[int(x) for x in input().split()]
     return  Goal_State
 ##-------------------------Defining my Get Robot Radius Function---------------------##
-def GetClearance():
+def GetRobotRadius():
     print("Enter Robot Radius.")
     Robot_Radius=int(input())
     return  Robot_Radius
@@ -379,4 +379,58 @@ def GetStepSize():
     StepSize=int(input())
     return  StepSize
 
+##--------------------------Defining my Plotting Function--------------------------##
+'''For Floats'''
+def Plotter(CurrentNodeState, ParentNodeState, Color):
+    #plt.quiver(ParentNodeState[0], ParentNodeState[1], ParentNodeState[0] - CurrentNodeState[0], ParentNodeState[1]- CurrentNodeState[1] ,units='xy' ,scale=10000 ,color= Color)
+    #plt.plot([ParentNodeState[0], CurrentNodeState[0]],[ParentNodeState[1], CurrentNodeState[1]], Color, linewidth = 0.5)
+    plt.plot(CurrentNodeState[0], CurrentNodeState[1], marker="o", markersize=2, markeredgecolor=Color, markerfacecolor=Color)
+    return plt
+
+'''For Integers'''
+def WSColoring(Workspace, Location, Color):
+    x,_,_ = Workspace.shape #Get Shape of Workspace
+    translation_y = Location[0] #Where in Y
+    translation_x = x - Location[1] - 1 #Where in X - (Shifts origin from top left to bottom right when plotting!)
+    Workspace[translation_x,translation_y,:] = Color #Change the Color to a set Color
+    return Workspace  
+
+
+
+
+
+
+
+
+
+##-----------------------------Main Function-----------------------------------------##
+arena = np.zeros((250, 600, 3), dtype = "uint8")
+InitState = GetInitialState()
+GoalState =GetGoalState()
+RobotRadius = GetRobotRadius()
+StepSize = GetStepSize()
+
+if not checkValid(InitState[0], InitState[1], RobotRadius):
+    print("Your Initial State is Inside an Obstacle, or Outside the Workspace. Please Retry.")
+    exit()
+if not checkValid(InitState[0], InitState[1], RobotRadius):
+    print("Your Goal State is Inside an Obstacle, or Outside the Workspace. Please Retry.")
+    exit()
+
+setup(RobotRadius)
+WSColoring(arena, InitState, (0,255,0))
+WSColoring(arena, GoalState, (0,255,0))
+
+plt.imshow(arena)
+plt.show()
+
+SizeArenaX = 600
+SizeArenaY = 250
+ThreshXY = 0.5
+ThreshTheta = 30
+ThreshGoalState = 1.5
+
+node_array = np.array([[[ 0 for k in range(int(360/ThreshTheta))] 
+                        for j in range(int(SizeArenaX/ThreshXY))] 
+                        for i in range(int(SizeArenaY/ThreshXY))])
 
