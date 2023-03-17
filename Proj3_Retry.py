@@ -434,3 +434,6 @@ node_array = np.array([[[ 0 for k in range(int(360/ThreshTheta))]
                         for j in range(int(SizeArenaX/ThreshXY))] 
                         for i in range(int(SizeArenaY/ThreshXY))])
 
+Open_List = PriorityQueue() #Initialize list using priority queue.
+
+
