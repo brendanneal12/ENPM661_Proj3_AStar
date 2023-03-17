@@ -293,7 +293,7 @@ def MoveTurnRight(Current_State, Step_Size, RobotRadius):
 
     return NewNodeState
 
-
+##------------------Concacts All Possible Actions into Single List---------------------##
 def GeneratePossibleMoves(Current_Node_State, StepSize, Robot_Radius):
     New_Node_Locations = []
     New_Node_Locations.append(MoveMaxTurnLeft(Current_Node_State, StepSize, Robot_Radius))
@@ -305,5 +305,78 @@ def GeneratePossibleMoves(Current_Node_State, StepSize, Robot_Radius):
     Possible_New_States = [Location for Location in New_Node_Locations if Location is not None]
 
     return Possible_New_States
+
+##---------------------Defining my Cost to Come Calculation-----------------------------##
+
+def Calculate_C2C(ChildNodeState, ParentNodeState):
+    X_Parent = ParentNodeState[0]
+    Y_Parent = ParentNodeState[1]
+    X_Child = ChildNodeState[0]
+    Y_Child = ChildNodeState[1]
+    C2C = np.sqrt((X_Child-X_Parent)**2 + (Y_Child - Y_Parent)**2)
+    return C2C
+
+##---------------------------Defining my Cost to Go Calculation---------------------------##
+def Calculate_C2G(CurrentNodeState, GoalNodeState):
+    X_Current = CurrentNodeState[0]
+    Y_Current = CurrentNodeState[1]
+    X_Goal = GoalNodeState[0]
+    Y_Goal = GoalNodeState[1]
+    C2G = np.sqrt((X_Goal-X_Current)**2 + (Y_Goal- Y_Current)**2)
+    return C2G
+
+##-----------------------Defining my Compare to Goal Function---------------------------##
+
+def CompareToGoal(Current_Node_Position, Goal_Node_Position, ErrorThreshold):
+    Dist2Goal = (Goal_Node_Position[0] - Current_Node_Position[0])**2 + (Goal_Node_Position[1] - Current_Node_Position[1])**2
+    if Dist2Goal < ErrorThreshold**2 and Current_Node_Position[2] == Goal_Node_Position[2]:
+        return True
+    else:
+        return False
+    
+##-------------------------Defining my Round to Half Function-------------------------##
+''' This function is Required for "Check Visited" Capabilities'''
+def Round2Half(number):
+    testvalue = np.round(2*number)/2
+    if (testvalue == 10):
+        testvalue = testvalue - 0.5
+    return testvalue
+
+##---------------------------Defining my Check Visited Function-----------------------##
+def CheckIfVisited(Current_Node_State, Node_Array, XYThreshold, ThetaThreshold):
+    X = Current_Node_State[0]
+    Y = Current_Node_State[1]
+    Theta = Current_Node_State[2]
+    X = int(Round2Half(X)/XYThreshold)
+    Y = int(Round2Half(Y)/XYThreshold)
+    Theta = int(Round2Half(Theta)/ThetaThreshold)
+    if Node_Array[Y,X,Theta] == 1:
+        result = True
+    else:
+        result = False
+    return result
+
+##------------------------Defining my GetInitialState Function-----------------------##
+def GetInitialState():
+    print("Enter Initial Node X, Y, and Theta separated by spaces: ")
+    Init_State=[int(x) for x in input().split()]
+    return Init_State
+
+##------------------------Defining my GetGoalState Function--------------------------##
+def GetGoalState():
+    print("Enter Goal Node X and Y, and Theta separated by spaces: ")
+    Goal_State=[int(x) for x in input().split()]
+    return  Goal_State
+##-------------------------Defining my Get Robot Radius Function---------------------##
+def GetClearance():
+    print("Enter Robot Radius.")
+    Robot_Radius=int(input())
+    return  Robot_Radius
+
+##-------------------------Defining my Get Step Size Function-----------------------##
+def GetStepSize():
+    print("Enter Robot Step Size (L = 1 to L = 10)")
+    StepSize=int(input())
+    return  StepSize
 
 
