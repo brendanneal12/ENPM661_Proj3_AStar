@@ -15,11 +15,11 @@ from queue import PriorityQueue
 class Node():
     #Initializing Function
 
-    def __init__(self, state, parent, C2C, C2G, TotalCost):
+    def __init__(self, state, parent, move, C2C, TotalCost):
         self.state = state
         self.parent = parent
+        self.move = move
         self.C2C = C2C
-        self.C2G = C2G
         self.TotalCost = TotalCost
 
     #---Methods for this Class---#
@@ -34,16 +34,15 @@ class Node():
             return None
         return self.ReturnParent().ReturnState()
     
+    def ReturnMove(self):
+        return self.move
+    
     def ReturnC2C(self):
         return self.C2C
-    
-    def ReturnC2G(self):
-        return self.C2G
     
     def ReturnTotalCost(self): #Returns the Cost Leading up to the Node
         return self.TotalCost
 
-    
     def __lt__(self, other): #OOP Definition for Less than. Required for Priority Queue.
         return self.TotalCost < other.TotalCost
     
@@ -160,7 +159,7 @@ def checkBorder(x, y):
 ##-------------------------------Defining Radial Clearance Function--------------##
 def checkClearance(x, y, r):
     
-    rr = r - 1
+    rr = r+1
     
     if rr == 0:
         return False
@@ -215,10 +214,14 @@ def checkValid(x, y, r):
 ##---------------------------------Defining my Action Set-------------------------------------##
 def MoveMaxTurnLeft(Current_State, Step_Size, RobotRadius):
     RobotTheta = Current_State[2]
-    if RobotTheta >=360:
-        RobotTheta = RobotTheta -360
-
     MoveTheta = RobotTheta + 60
+
+    if MoveTheta >=360:
+        MoveTheta = MoveTheta -360
+    if MoveTheta <0:
+        MoveTheta = MoveTheta + 360
+
+
 
     ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
     ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
@@ -231,10 +234,12 @@ def MoveMaxTurnLeft(Current_State, Step_Size, RobotRadius):
 
 def MoveTurnLeft(Current_State, Step_Size, RobotRadius):
     RobotTheta = Current_State[2]
-    if RobotTheta >=360:
-        RobotTheta = RobotTheta -360
-
     MoveTheta = RobotTheta + 30
+
+    if MoveTheta >=360:
+        MoveTheta = MoveTheta -360
+    if MoveTheta <0:
+        MoveTheta = MoveTheta + 360
 
     ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
     ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
@@ -247,10 +252,12 @@ def MoveTurnLeft(Current_State, Step_Size, RobotRadius):
 
 def MoveStraight(Current_State, Step_Size, RobotRadius):
     RobotTheta = Current_State[2]
-    if RobotTheta >=360:
-        RobotTheta = RobotTheta -360
-
     MoveTheta = RobotTheta
+
+    if MoveTheta >=360:
+        MoveTheta = MoveTheta -360
+    if MoveTheta <0:
+        MoveTheta = MoveTheta + 360
 
     ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
     ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
@@ -263,10 +270,12 @@ def MoveStraight(Current_State, Step_Size, RobotRadius):
 
 def MoveMaxTurnRight(Current_State, Step_Size, RobotRadius):
     RobotTheta = Current_State[2]
-    if RobotTheta >=360:
-        RobotTheta = RobotTheta -360
-
     MoveTheta = RobotTheta - 60
+
+    if MoveTheta >=360:
+        MoveTheta = MoveTheta -360
+    if MoveTheta <0:
+        MoveTheta = MoveTheta + 360
 
     ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
     ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
@@ -279,10 +288,12 @@ def MoveMaxTurnRight(Current_State, Step_Size, RobotRadius):
 
 def MoveTurnRight(Current_State, Step_Size, RobotRadius):
     RobotTheta = Current_State[2]
-    if RobotTheta >=360:
-        RobotTheta = RobotTheta -360
+    MoveTheta = RobotTheta - 30
 
-    MoveTheta = RobotTheta -30
+    if MoveTheta >=360:
+        MoveTheta = MoveTheta -360
+    if MoveTheta <0:
+        MoveTheta = MoveTheta + 360
 
     ChangeX = Step_Size * np.cos(np.radians(MoveTheta))
     ChangeY = Step_Size * np.sin(np.radians(MoveTheta))
@@ -294,7 +305,8 @@ def MoveTurnRight(Current_State, Step_Size, RobotRadius):
     return NewNodeState
 
 ##------------------Concacts All Possible Actions into Single List---------------------##
-def GeneratePossibleMoves(Current_Node_State, StepSize, Robot_Radius):
+def GeneratePossibleMoves(Current_Node, StepSize, Robot_Radius):
+    Current_Node_State = Current_Node.ReturnState()
     New_Node_Locations = []
     New_Node_Locations.append(MoveMaxTurnLeft(Current_Node_State, StepSize, Robot_Radius))
     New_Node_Locations.append(MoveTurnLeft(Current_Node_State, StepSize, Robot_Radius))
@@ -306,23 +318,16 @@ def GeneratePossibleMoves(Current_Node_State, StepSize, Robot_Radius):
 
     return Possible_New_States
 
-##---------------------Defining my Cost to Come Calculation-----------------------------##
-
-def Calculate_C2C(ChildNodeState, ParentNodeState):
-    X_Parent = ParentNodeState[0]
-    Y_Parent = ParentNodeState[1]
-    X_Child = ChildNodeState[0]
-    Y_Child = ChildNodeState[1]
-    C2C = np.sqrt((X_Child-X_Parent)**2 + (Y_Child - Y_Parent)**2)
-    return C2C
 
 ##---------------------------Defining my Cost to Go Calculation---------------------------##
 def Calculate_C2G(CurrentNodeState, GoalNodeState):
+    C2G = 0.0
     X_Current = CurrentNodeState[0]
     Y_Current = CurrentNodeState[1]
     X_Goal = GoalNodeState[0]
     Y_Goal = GoalNodeState[1]
-    C2G = np.sqrt((X_Goal-X_Current)**2 + (Y_Goal- Y_Current)**2)
+    if CurrentNodeState is not None:
+        C2G = np.sqrt((X_Goal-X_Current)**2 + (Y_Goal- Y_Current)**2)
     return C2G
 
 ##-----------------------Defining my Compare to Goal Function---------------------------##
@@ -355,6 +360,7 @@ def CheckIfVisited(Current_Node_State, Node_Array, XYThreshold, ThetaThreshold):
     else:
         result = False
     return result
+
 
 ##------------------------Defining my GetInitialState Function-----------------------##
 def GetInitialState():
@@ -396,13 +402,6 @@ def WSColoring(Workspace, Location, Color):
     return Workspace  
 
 
-
-
-
-
-
-
-
 ##-----------------------------Main Function-----------------------------------------##
 arena = np.zeros((250, 600, 3), dtype = "uint8")
 InitState = GetInitialState()
@@ -411,10 +410,10 @@ RobotRadius = GetRobotRadius()
 StepSize = GetStepSize()
 
 if not checkValid(InitState[0], InitState[1], RobotRadius):
-    print("Your Initial State is Inside an Obstacle, or Outside the Workspace. Please Retry.")
+    print("Your initial state is inside an obstacle or outside the workspace. Please retry.")
     exit()
-if not checkValid(InitState[0], InitState[1], RobotRadius):
-    print("Your Goal State is Inside an Obstacle, or Outside the Workspace. Please Retry.")
+if not checkValid(GoalState[0], GoalState[1], RobotRadius):
+    print("Your goal state is inside an obstacle or outside the workspace. Please retry.")
     exit()
 
 setup(RobotRadius)
@@ -435,5 +434,63 @@ node_array = np.array([[[ 0 for k in range(int(360/ThreshTheta))]
                         for i in range(int(SizeArenaY/ThreshXY))])
 
 Open_List = PriorityQueue() #Initialize list using priority queue.
+Open_List_List = []
+starting_node_Temp = Node(InitState, None, None, 0, 0) #Generate starting node based on the initial state given above.
+starting_node = Node(InitState, starting_node_Temp, None, 0, Calculate_C2G(InitState, GoalState)) #Generate starting node based on the initial state given above.
+Open_List.put((starting_node.ReturnTotalCost(), starting_node)) #Add to Open List
+
+
+GoalReach = False #Initialze Goal Check Variable
+
+Closed_List= np.array([])#Initialize Closed List of nodes, size of workspace, and setting their cost to infinity to allow for Dijkstra searching.
+
+##-----------------------CONDUCT A*---------------------##
+
+starttime = timeit.default_timer() #Start the Timer when serch starts
+print("A* Search Starting!!!!")
+
+while not (Open_List.empty()):
+    current_node = Open_List.get()[1] #Grab first (lowest cost) item from Priority Queue.
+    Plotter(current_node.ReturnState(), current_node.ReturnParentState(), 'g')
+    print(current_node.ReturnState(), current_node.ReturnTotalCost())
+    np.append(Closed_List, current_node.ReturnState())
+
+
+
+    goalreachcheck = CompareToGoal(current_node.ReturnState(), GoalState, ThreshGoalState) #Check if we have reached goal.
+
+    if goalreachcheck: #If we have reached goal node.
+        print("Goal Reached!")
+        print("Total Cost:", current_node.ReturnTotalCost()) #Print Total Cost
+        MovesPath, Path = current_node.ReturnPath() #BackTrack to find path.
+        for nodes in Path:
+            Plotter(nodes.ReturnState(), nodes.ReturnParentState(), 'm')
+
+
+    else: #If you have NOT reached the goal node
+        NewNodeStates = GeneratePossibleMoves(current_node, StepSize, RobotRadius)#Generate New Nodes from the possible moves current node can take.
+        ParentC2C = current_node.ReturnC2C()
+        if NewNodeStates not in Closed_List: #Check to see if the new node position is currently in the closed list
+            for State in NewNodeStates: #For each new node generated by the possible moves.
+                ChildNode_C2C = ParentC2C + StepSize
+                ChildNode_Total_Cost = ChildNode_C2C + Calculate_C2G(State, GoalState)
+                NewChild = Node(State, current_node, "Move" ,ChildNode_C2C, ChildNode_Total_Cost)
+                if CheckIfVisited(NewChild.ReturnState(), node_array, ThreshXY, ThreshTheta) ==  False:
+                    node_array[int(Round2Half(NewChild.ReturnState()[1])/ThreshXY), int(Round2Half(NewChild.ReturnState()[0])/ThreshXY), int(Round2Half(NewChild.ReturnState()[2])/ThreshTheta)] = 1
+                    Open_List.put((NewChild.ReturnTotalCost() , NewChild))
+                if CheckIfVisited(NewChild.ReturnState(), node_array, ThreshXY, ThreshTheta) ==  True:
+                        if NewChild.ReturnTotalCost() > current_node.ReturnC2C() + StepSize:
+                            NewChild.parent = current_node
+                            NewChild.C2C = current_node.ReturnC2C() + StepSize
+                            NewChild.TotalCost = NewChild.ReturnC2C() + Calculate_C2G(NewChild.ReturnState(), GoalState)
+
+    if goalreachcheck: #If you reach goal
+        break #Break the Loop
+
+stoptime = timeit.default_timer() #Stop the Timer, as Searching is complete.
+print("That took", stoptime - starttime, "seconds to complete")
+
+plt.imshow(arena, origin='lower')
+plt.show()
 
 
