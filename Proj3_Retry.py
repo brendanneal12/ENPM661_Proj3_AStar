@@ -388,9 +388,9 @@ def GetStepSize():
 ##--------------------------Defining my Plotting Function--------------------------##
 '''For Floats'''
 def Plotter(CurrentNodeState, ParentNodeState, Color):
-    #plt.quiver(ParentNodeState[0], ParentNodeState[1], ParentNodeState[0] - CurrentNodeState[0], ParentNodeState[1]- CurrentNodeState[1] ,units='xy' ,scale=1 ,color= Color, headwidth = 0.25, headlength = 0.25)
-    plt.plot([ParentNodeState[0], CurrentNodeState[0]],[ParentNodeState[1], CurrentNodeState[1]], Color, linewidth = 0.75)
-    #plt.plot(CurrentNodeState[0], CurrentNodeState[1], marker="o", markersize=2, markeredgecolor=Color, markerfacecolor=Color)
+    #plt.plot([ParentNodeState[0], CurrentNodeState[0]],[ParentNodeState[1], CurrentNodeState[1]], Color, linewidth = 0.75)
+    line = plt.Line2D((ParentNodeState[0], CurrentNodeState[0]),(ParentNodeState[1], CurrentNodeState[1]), lw = 0.75, color = Color)
+    plt.gca().add_line(line)
     return plt
 
 '''For Integers'''
@@ -429,6 +429,10 @@ ThreshXY = 0.5
 ThreshTheta = 30
 ThreshGoalState = 1.5
 
+video_name = ('astar_brendan_neal_adam_lobo') #Initialize Video Object
+fourcc = cv.VideoWriter_fourcc(*"mp4v") #Initialize Video Writer using fourcc
+video = cv.VideoWriter(str(video_name)+".mp4", fourcc, 300, (SizeArenaX, SizeArenaY)) #Initialize the Name, method, frame rate, and size of Video.
+
 node_array = np.array([[[ 0 for k in range(int(360/ThreshTheta))] 
                         for j in range(int(SizeArenaX/ThreshXY))] 
                         for i in range(int(SizeArenaY/ThreshXY))])
@@ -452,6 +456,9 @@ print("A* Search Starting!!!!")
 while not (Open_List.empty()):
     current_node = Open_List.get()[1] #Grab first (lowest cost) item from Priority Queue.
     Plotter(current_node.ReturnState(), current_node.ReturnParentState(), 'g')
+
+    video.write(cv.cvtColor(arena, cv.COLOR_RGB2BGR)) #Write exploration to video.
+
     print(current_node.ReturnState(), current_node.ReturnTotalCost())
     np.append(Closed_List, current_node.ReturnState())
 
@@ -465,6 +472,13 @@ while not (Open_List.empty()):
         MovesPath, Path = current_node.ReturnPath() #BackTrack to find path.
         for nodes in Path:
             Plotter(nodes.ReturnState(), nodes.ReturnParentState(), 'm')
+            video.write(cv.cvtColor(arena, cv.COLOR_RGB2BGR)) #Write to video.
+
+        ##----------Extend Video a Little Longer to see Everything--------##
+        for i in range(200):
+            video.write(cv.cvtColor(arena, cv.COLOR_RGB2BGR))
+
+        break
 
 
     else: #If you have NOT reached the goal node
@@ -489,6 +503,8 @@ while not (Open_List.empty()):
 
 stoptime = timeit.default_timer() #Stop the Timer, as Searching is complete.
 print("That took", stoptime - starttime, "seconds to complete")
+
+video.release()
 
 plt.imshow(arena, origin='lower')
 plt.show()
