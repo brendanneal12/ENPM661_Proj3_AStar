@@ -10,6 +10,7 @@ import timeit
 import queue
 from queue import PriorityQueue
 
+
 ##------------Defining Node Class (From Previous Lab)-----------------##
 
 class Node():
@@ -388,10 +389,9 @@ def GetStepSize():
 ##--------------------------Defining my Plotting Function--------------------------##
 '''For Floats'''
 def Plotter(CurrentNodeState, ParentNodeState, Color):
-    #plt.plot([ParentNodeState[0], CurrentNodeState[0]],[ParentNodeState[1], CurrentNodeState[1]], Color, linewidth = 0.75)
-    line = plt.Line2D((ParentNodeState[0], CurrentNodeState[0]),(ParentNodeState[1], CurrentNodeState[1]), lw = 0.75, color = Color)
-    plt.gca().add_line(line)
-    return plt
+    plt.plot([ParentNodeState[0], CurrentNodeState[0]],[ParentNodeState[1], CurrentNodeState[1]], Color, linewidth = 0.75)
+
+    
 
 '''For Integers'''
 def WSColoring(Workspace, Location, Color):
@@ -423,22 +423,20 @@ WSColoring(arena, GoalState, (0,255,0))
 plt.imshow(arena)
 plt.show()
 
+
 SizeArenaX = 600
 SizeArenaY = 250
 ThreshXY = 0.5
 ThreshTheta = 30
 ThreshGoalState = 1.5
 
-video_name = ('astar_brendan_neal_adam_lobo') #Initialize Video Object
-fourcc = cv.VideoWriter_fourcc(*"mp4v") #Initialize Video Writer using fourcc
-video = cv.VideoWriter(str(video_name)+".mp4", fourcc, 300, (SizeArenaX, SizeArenaY)) #Initialize the Name, method, frame rate, and size of Video.
 
 node_array = np.array([[[ 0 for k in range(int(360/ThreshTheta))] 
                         for j in range(int(SizeArenaX/ThreshXY))] 
                         for i in range(int(SizeArenaY/ThreshXY))])
 
 Open_List = PriorityQueue() #Initialize list using priority queue.
-Open_List_List = []
+traversed_nodes = []
 starting_node_Temp = Node(InitState, None, None, 0, 0) #Generate starting node based on the initial state given above.
 starting_node = Node(InitState, starting_node_Temp, None, 0, Calculate_C2G(InitState, GoalState)) #Generate starting node based on the initial state given above.
 Open_List.put((starting_node.ReturnTotalCost(), starting_node)) #Add to Open List
@@ -455,9 +453,12 @@ print("A* Search Starting!!!!")
 
 while not (Open_List.empty()):
     current_node = Open_List.get()[1] #Grab first (lowest cost) item from Priority Queue.
+    traversed_nodes.append(current_node)
     Plotter(current_node.ReturnState(), current_node.ReturnParentState(), 'g')
 
-    video.write(cv.cvtColor(arena, cv.COLOR_RGB2BGR)) #Write exploration to video.
+
+
+
 
     print(current_node.ReturnState(), current_node.ReturnTotalCost())
     np.append(Closed_List, current_node.ReturnState())
@@ -472,7 +473,7 @@ while not (Open_List.empty()):
         MovesPath, Path = current_node.ReturnPath() #BackTrack to find path.
         for nodes in Path:
             Plotter(nodes.ReturnState(), nodes.ReturnParentState(), 'm')
-            video.write(cv.cvtColor(arena, cv.COLOR_RGB2BGR)) #Write to video.
+
 
         ##----------Extend Video a Little Longer to see Everything--------##
         for i in range(200):
@@ -508,5 +509,28 @@ video.release()
 
 plt.imshow(arena, origin='lower')
 plt.show()
+
+
+##--------------------Visualization--------------------##
+plt.plot(InitState[0], InitState[1], 'go', markersize = 0.5)
+plt.imshow(arena, origin = 'lower')
+
+for node in traversed_nodes:
+    curr_node_state = node.ReturnState()
+    parent_node_state = node.ReturnParentState()
+    Plotter(curr_node_state, parent_node_state, 'g')
+    plt.pause(0.00001)
+    
+
+for node in Path:
+    curr_node_state = node.ReturnState()
+    parent_node_state = node.ReturnParentState()
+    Plotter(curr_node_state, parent_node_state, 'm')
+    plt.pause(0.0001)
+
+plt.show()
+plt.close()
+
+
 
 
