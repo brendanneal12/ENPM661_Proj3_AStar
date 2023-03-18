@@ -388,9 +388,9 @@ def GetStepSize():
 ##--------------------------Defining my Plotting Function--------------------------##
 '''For Floats'''
 def Plotter(CurrentNodeState, ParentNodeState, Color):
-    #plt.quiver(ParentNodeState[0], ParentNodeState[1], ParentNodeState[0] - CurrentNodeState[0], ParentNodeState[1]- CurrentNodeState[1] ,units='xy' ,scale=10000 ,color= Color)
-    #plt.plot([ParentNodeState[0], CurrentNodeState[0]],[ParentNodeState[1], CurrentNodeState[1]], Color, linewidth = 0.5)
-    plt.plot(CurrentNodeState[0], CurrentNodeState[1], marker="o", markersize=2, markeredgecolor=Color, markerfacecolor=Color)
+    #plt.quiver(ParentNodeState[0], ParentNodeState[1], ParentNodeState[0] - CurrentNodeState[0], ParentNodeState[1]- CurrentNodeState[1] ,units='xy' ,scale=1 ,color= Color, headwidth = 0.25, headlength = 0.25)
+    plt.plot([ParentNodeState[0], CurrentNodeState[0]],[ParentNodeState[1], CurrentNodeState[1]], Color, linewidth = 0.75)
+    #plt.plot(CurrentNodeState[0], CurrentNodeState[1], marker="o", markersize=2, markeredgecolor=Color, markerfacecolor=Color)
     return plt
 
 '''For Integers'''
