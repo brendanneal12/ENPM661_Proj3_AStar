@@ -25,9 +25,10 @@ numpy, from matplotlib: pyplot, opencv, math, timeit, from queue: PriorityQueue
 # How to Run Code
 
 1. Hit Run
-2. Prompted by the terminal, enter the initial state X, Y, and Theta with spaces separating them. Theta should be a multiple of 30 (0,30,60,270,etc.)
+2. Prompted by the terminal, enter the initial state X, Y, and Theta with spaces separating them. Theta should be a multiple of 30 (0,30,60,270,etc.) Example: (5 5 0)
 3. If your initial state is in an obstacle or outside of the workspace, you will be prompted to restart.
-4. Prompted by the terminal, enter the goal state X, Y, and Theta with spaces separating them. Theta should be a multiple of 30 (0,30,60,270,etc.)
+4. Prompted by the terminal, enter the goal state X, Y, and Theta with spaces separating them. Theta should be a multiple of 30 (0,30,60,270,etc.) 
+Example: (25 25 30)
 5. If your goal state is in an obstacle or outside of the workspace, you will be prompted to restart.
 6. Enter the Robot Radius
 7. Enter the Step Size.
@@ -42,6 +43,6 @@ numpy, from matplotlib: pyplot, opencv, math, timeit, from queue: PriorityQueue
 1. For cases far away the start point, the search can take upwards of 10-15 minutes. We're not generating repeat nodes, but we have noticed that getting through the two rectangles is a bit of a challenge. Please be patient.
 2. The visualization is also quite slow. Please be patient.
 3. For smaller step sizes, the search appears to be  large blob, but if you zoom in you can see the individual moves quite well.
-4. Please click the following link in order to view an example output video that is produced by our code. Initial State is 5 5, Goal State is 300 225. I cannot commit the video directly to GitHub since the file size is way too large: https://drive.google.com/drive/u/0/folders/11FW4Fq-76BoGIyPZIVHYzmYJJwSpE-TE
+4. Please click the following link in order to view an example output video that is produced by our code. Initial State is 5 5 0. Goal State is 50 50 30. Robot Radius is 5, Step Size is 5.I cannot commit the video directly to GitHub since the file size is way too large: https://drive.google.com/drive/u/0/folders/11FW4Fq-76BoGIyPZIVHYzmYJJwSpE-TE
 
 

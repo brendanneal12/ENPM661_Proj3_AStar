@@ -509,7 +509,7 @@ for node in traversed_nodes: #Plots the search area
     curr_node_state = node.ReturnState()
     parent_node_state = node.ReturnParentState()
     Plotter(curr_node_state, parent_node_state, 'g')
-    plt.pause(0.00001)
+    plt.pause(0.000001)
     
 
 for node in Path: #Plots the ideal path
