@@ -399,7 +399,7 @@ def Plotter(CurrentNodeState, ParentNodeState, Color):
 def WSColoring(Workspace, Location, Color):
     x,_,_ = Workspace.shape #Get Shape of Workspace
     translation_y = Location[0] #Where in Y
-    translation_x = x - Location[1] - 1 #Where in X - (Shifts origin from top left to bottom right when plotting!)
+    translation_x = Location[1] #Where in X - (Shifts origin from top left to bottom right when plotting!)
     Workspace[translation_x,translation_y,:] = Color #Change the Color to a set Color
     return Workspace  
 
@@ -422,7 +422,7 @@ setup(RobotRadius)
 WSColoring(arena, InitState, (0,255,0))
 WSColoring(arena, GoalState, (0,255,0))
 
-plt.imshow(arena)
+plt.imshow(arena, origin= 'lower')
 plt.show()
 
 #Initialize Arena and Thresholds
@@ -456,7 +456,7 @@ print("A* Search Starting!!!!")
 while not (Open_List.empty()):
     current_node = Open_List.get()[1] #Grab first (lowest cost) item from Priority Queue.
     traversed_nodes.append(current_node) #Append the explored node (for visualization later)
-    Plotter(current_node.ReturnState(), current_node.ReturnParentState(), 'g') #Plot the move
+    #Plotter(current_node.ReturnState(), current_node.ReturnParentState(), 'g') #Plot the move
     print(current_node.ReturnState(), current_node.ReturnTotalCost()) #Print to show search is working.
     np.append(Closed_List, current_node.ReturnState()) #Append to Closed List
     goalreachcheck = CompareToGoal(current_node.ReturnState(), GoalState, ThreshGoalState) #Check if we have reached goal.
